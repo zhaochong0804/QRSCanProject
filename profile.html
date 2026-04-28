@@ -127,7 +127,7 @@
     }
 
     .face-desc {
-      margin: 8px 0 0;
+      margin: 8px 0 12px;
       font-size: 12px;
       color: #5a6780;
     }
@@ -138,6 +138,18 @@
       font-size: 12px;
       color: #4b5563;
       min-height: 16px;
+    }
+
+    .hint {
+      margin-top: 6px;
+      margin-bottom: 0;
+      min-height: 16px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .hint:empty {
+      display: none;
     }
 
     .review-tip {
@@ -238,10 +250,11 @@
         <input
           id="fundInput"
           type="text"
-          inputmode="decimal"
+          inputmode="numeric"
           placeholder="请输入公积金数，例如 3000"
           maxlength="12"
         />
+        <p class="hint" id="fundHint"></p>
 
         <label class="field-gap" for="companyNameInput">单位名称</label>
         <input
@@ -280,6 +293,7 @@
   <script>
     const educationInput = document.getElementById("educationInput");
     const fundInput = document.getElementById("fundInput");
+    const fundHint = document.getElementById("fundHint");
     const companyNameInput = document.getElementById("companyNameInput");
     const companyAddrInput = document.getElementById("companyAddrInput");
     const startFaceBtn = document.getElementById("startFaceBtn");
@@ -344,6 +358,13 @@
       el.addEventListener("change", saveDraft);
     });
 
+    fundInput.addEventListener("input", () => {
+      const raw = fundInput.value;
+      const cleaned = raw.replace(/\D/g, "").slice(0, 12);
+      fundInput.value = cleaned;
+      fundHint.textContent = raw !== cleaned ? "仅支持输入数字，已自动过滤。" : "";
+    });
+
     startFaceBtn.addEventListener("click", () => {
       saveDraft();
       window.location.href = "face_verify.html";
@@ -364,8 +385,8 @@
         return;
       }
 
-      if (!/^\d+(\.\d{1,2})?$/.test(fundInput.value.trim())) {
-        showToast("公积金数格式不正确");
+      if (!/^\d+$/.test(fundInput.value.trim())) {
+        showToast("公积金数仅支持数字");
         return;
       }
 
@@ -387,7 +408,7 @@
 
       submitBtn.disabled = true;
       submitBtn.classList.add("loading");
-      btnText.textContent = "审核中（60秒）...";
+      btnText.textContent = "审核中...";
 
       let remain = 60;
       reviewTip.textContent = `审核中，预计 ${remain} 秒后出结果...`;
