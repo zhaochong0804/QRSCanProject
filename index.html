@@ -100,6 +100,95 @@
       background: #ffffff;
     }
 
+    input[type="file"] {
+      padding: 8px 10px;
+    }
+
+    .hidden-file-input {
+      display: none;
+    }
+
+    .upload-action-btn {
+      width: auto;
+      min-height: 34px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #1668dc;
+      border: 1px solid #9ac0ff;
+      box-shadow: none;
+      font-size: 13px;
+      margin-top: 8px;
+      justify-self: start;
+    }
+
+    .id-preview {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #d6deef;
+      background: #eef3ff;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      display: none;
+    }
+
+    .id-preview-wrap {
+      margin-top: 8px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .id-preview-shell {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #d6deef;
+      background: #eef3ff;
+      aspect-ratio: 16 / 10;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-loading {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(238, 243, 255, 0.82);
+      color: #4a5f8f;
+      font-size: 13px;
+      gap: 8px;
+    }
+
+    .preview-loading.active {
+      display: flex;
+    }
+
+    .preview-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(74, 95, 143, 0.28);
+      border-top-color: #4a5f8f;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .id-delete-btn {
+      width: auto;
+      min-height: 34px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #1668dc;
+      border: 1px solid #9ac0ff;
+      box-shadow: none;
+      font-size: 13px;
+      justify-self: start;
+    }
+
     input:focus {
       border-color: #1677ff;
       box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
@@ -196,6 +285,10 @@
     <div class="top-bar">证件审核中心</div>
     <main class="card">
       <h1>身份信息审核</h1>
+      <p class="status-line">
+        <span class="status-dot" aria-hidden="true"></span>
+        第一步：基础信息与身份证上传
+      </p>
       <div class="form-block">
         <label for="nameInput">姓名</label>
         <input
@@ -217,19 +310,53 @@
         />
         <p class="hint" id="phoneHint"></p>
 
-        <label class="field-gap" for="idInput">身份证号</label>
+        <label class="field-gap" for="idFrontInput">上传身份证正面</label>
+        <input id="idFrontInput" type="file" accept="image/*" />
+        <button id="idFrontCameraBtn" class="upload-action-btn" type="button">拍照上传正面</button>
         <input
-          id="idInput"
-          type="text"
-          autocomplete="off"
-          placeholder="请输入身份证号"
-          maxlength="32"
+          id="idFrontCameraInput"
+          class="hidden-file-input"
+          type="file"
+          accept="image/*"
+          capture="environment"
         />
-        <p class="hint" id="hint"></p>
+        <div class="id-preview-wrap">
+          <div class="id-preview-shell">
+            <img id="idFrontPreview" class="id-preview" alt="身份证正面预览" />
+            <div id="idFrontLoading" class="preview-loading">
+              <span class="preview-spinner" aria-hidden="true"></span>
+              图片上传中...
+            </div>
+          </div>
+          <button id="idFrontDeleteBtn" class="id-delete-btn" type="button" disabled>删除并重选</button>
+        </div>
+        <p class="hint" id="frontHint"></p>
+
+        <label class="field-gap" for="idBackInput">上传身份证反面</label>
+        <input id="idBackInput" type="file" accept="image/*" />
+        <button id="idBackCameraBtn" class="upload-action-btn" type="button">拍照上传反面</button>
+        <input
+          id="idBackCameraInput"
+          class="hidden-file-input"
+          type="file"
+          accept="image/*"
+          capture="environment"
+        />
+        <div class="id-preview-wrap">
+          <div class="id-preview-shell">
+            <img id="idBackPreview" class="id-preview" alt="身份证反面预览" />
+            <div id="idBackLoading" class="preview-loading">
+              <span class="preview-spinner" aria-hidden="true"></span>
+              图片上传中...
+            </div>
+          </div>
+          <button id="idBackDeleteBtn" class="id-delete-btn" type="button" disabled>删除并重选</button>
+        </div>
+        <p class="hint" id="backHint"></p>
       </div>
       <button id="submitBtn" type="button">
         <span class="spinner" aria-hidden="true"></span>
-        <span id="btnText">提交审核</span>
+        <span id="btnText">确认并下一步</span>
       </button>
     </main>
   </section>
@@ -240,13 +367,33 @@
     const nameInput = document.getElementById("nameInput");
     const phoneInput = document.getElementById("phoneInput");
     const phoneHint = document.getElementById("phoneHint");
-    const idInput = document.getElementById("idInput");
-    const hint = document.getElementById("hint");
+    const idFrontInput = document.getElementById("idFrontInput");
+    const idBackInput = document.getElementById("idBackInput");
+    const idFrontCameraBtn = document.getElementById("idFrontCameraBtn");
+    const idBackCameraBtn = document.getElementById("idBackCameraBtn");
+    const idFrontCameraInput = document.getElementById("idFrontCameraInput");
+    const idBackCameraInput = document.getElementById("idBackCameraInput");
+    const idFrontPreview = document.getElementById("idFrontPreview");
+    const idBackPreview = document.getElementById("idBackPreview");
+    const idFrontLoading = document.getElementById("idFrontLoading");
+    const idBackLoading = document.getElementById("idBackLoading");
+    const idFrontDeleteBtn = document.getElementById("idFrontDeleteBtn");
+    const idBackDeleteBtn = document.getElementById("idBackDeleteBtn");
+    const frontHint = document.getElementById("frontHint");
+    const backHint = document.getElementById("backHint");
     const submitBtn = document.getElementById("submitBtn");
     const btnText = document.getElementById("btnText");
     const toast = document.getElementById("toast");
 
     let timer = null;
+    let frontPreviewTimer = null;
+    let backPreviewTimer = null;
+    let frontObjectUrl = null;
+    let backObjectUrl = null;
+    let frontUploading = false;
+    let backUploading = false;
+    let frontSelectedFile = null;
+    let backSelectedFile = null;
 
     function showToast(message) {
       toast.textContent = message;
@@ -255,17 +402,6 @@
         toast.classList.remove("show");
       }, 1600);
     }
-
-    idInput.addEventListener("input", () => {
-      const raw = idInput.value;
-      const cleaned = raw.replace(/[^0-9a-zA-Z]/g, "");
-      if (raw !== cleaned) {
-        hint.textContent = "仅允许输入数字和英文，已自动过滤非法字符。";
-      } else {
-        hint.textContent = "";
-      }
-      idInput.value = cleaned;
-    });
 
     phoneInput.addEventListener("input", () => {
       const raw = phoneInput.value;
@@ -276,6 +412,160 @@
         phoneHint.textContent = "";
       }
       phoneInput.value = cleaned;
+    });
+
+    function clearUpload(key) {
+      const refs = key === "front"
+        ? {
+            input: idFrontInput,
+            preview: idFrontPreview,
+            loading: idFrontLoading,
+            button: idFrontDeleteBtn,
+            hint: frontHint,
+          }
+        : {
+            input: idBackInput,
+            preview: idBackPreview,
+            loading: idBackLoading,
+            button: idBackDeleteBtn,
+            hint: backHint,
+          };
+
+      if (key === "front" && frontPreviewTimer) {
+        window.clearTimeout(frontPreviewTimer);
+        frontPreviewTimer = null;
+      }
+      if (key === "back" && backPreviewTimer) {
+        window.clearTimeout(backPreviewTimer);
+        backPreviewTimer = null;
+      }
+      if (key === "front" && frontObjectUrl) {
+        URL.revokeObjectURL(frontObjectUrl);
+        frontObjectUrl = null;
+      }
+      if (key === "back" && backObjectUrl) {
+        URL.revokeObjectURL(backObjectUrl);
+        backObjectUrl = null;
+      }
+
+      refs.input.value = "";
+      if (key === "front") {
+        idFrontCameraInput.value = "";
+      } else {
+        idBackCameraInput.value = "";
+      }
+      refs.preview.removeAttribute("src");
+      refs.preview.style.display = "none";
+      refs.loading.classList.remove("active");
+      refs.button.disabled = true;
+      refs.hint.textContent = "";
+      if (key === "front") {
+        frontUploading = false;
+        frontSelectedFile = null;
+      } else {
+        backUploading = false;
+        backSelectedFile = null;
+      }
+    }
+
+    function updatePreview(file, previewImg, loadingEl, deleteBtn, key) {
+      if (!file) {
+        clearUpload(key);
+        return;
+      }
+
+      if (key === "front" && frontPreviewTimer) {
+        window.clearTimeout(frontPreviewTimer);
+      }
+      if (key === "back" && backPreviewTimer) {
+        window.clearTimeout(backPreviewTimer);
+      }
+
+      if (key === "front" && frontObjectUrl) {
+        URL.revokeObjectURL(frontObjectUrl);
+        frontObjectUrl = null;
+      }
+      if (key === "back" && backObjectUrl) {
+        URL.revokeObjectURL(backObjectUrl);
+        backObjectUrl = null;
+      }
+
+      const url = URL.createObjectURL(file);
+      if (key === "front") {
+        frontObjectUrl = url;
+        frontSelectedFile = file;
+      } else {
+        backObjectUrl = url;
+        backSelectedFile = file;
+      }
+
+      previewImg.style.display = "none";
+      loadingEl.classList.add("active");
+      deleteBtn.disabled = false;
+      if (key === "front") {
+        frontUploading = true;
+      } else {
+        backUploading = true;
+      }
+
+      const delayedShow = () => {
+        previewImg.src = url;
+        previewImg.style.display = "block";
+        loadingEl.classList.remove("active");
+        if (key === "front") {
+          frontUploading = false;
+        } else {
+          backUploading = false;
+        }
+      };
+
+      if (key === "front") {
+        frontPreviewTimer = window.setTimeout(delayedShow, 3000);
+      } else {
+        backPreviewTimer = window.setTimeout(delayedShow, 3000);
+      }
+    }
+
+    idFrontInput.addEventListener("change", () => {
+      const file = idFrontInput.files[0];
+      frontHint.textContent = file ? "" : "请上传身份证正面照片。";
+      updatePreview(file, idFrontPreview, idFrontLoading, idFrontDeleteBtn, "front");
+    });
+
+    idBackInput.addEventListener("change", () => {
+      const file = idBackInput.files[0];
+      backHint.textContent = file ? "" : "请上传身份证反面照片。";
+      updatePreview(file, idBackPreview, idBackLoading, idBackDeleteBtn, "back");
+    });
+
+    idFrontCameraBtn.addEventListener("click", () => {
+      idFrontCameraInput.click();
+    });
+
+    idBackCameraBtn.addEventListener("click", () => {
+      idBackCameraInput.click();
+    });
+
+    idFrontCameraInput.addEventListener("change", () => {
+      const file = idFrontCameraInput.files[0];
+      frontHint.textContent = file ? "" : "请上传身份证正面照片。";
+      updatePreview(file, idFrontPreview, idFrontLoading, idFrontDeleteBtn, "front");
+    });
+
+    idBackCameraInput.addEventListener("change", () => {
+      const file = idBackCameraInput.files[0];
+      backHint.textContent = file ? "" : "请上传身份证反面照片。";
+      updatePreview(file, idBackPreview, idBackLoading, idBackDeleteBtn, "back");
+    });
+
+    idFrontDeleteBtn.addEventListener("click", () => {
+      clearUpload("front");
+      showToast("已删除身份证正面，请重新上传");
+    });
+
+    idBackDeleteBtn.addEventListener("click", () => {
+      clearUpload("back");
+      showToast("已删除身份证反面，请重新上传");
     });
 
     submitBtn.addEventListener("click", () => {
@@ -298,23 +588,47 @@
         return;
       }
 
-      if (!idInput.value.trim()) {
-        showToast("请输入身份证号");
+      if (!frontSelectedFile) {
+        frontHint.textContent = "请上传身份证正面照片。";
+        showToast("请上传身份证正面");
+        return;
+      }
+
+      if (!backSelectedFile) {
+        backHint.textContent = "请上传身份证反面照片。";
+        showToast("请上传身份证反面");
+        return;
+      }
+
+      if (frontUploading || backUploading) {
+        showToast("图片上传中，请等待加载完成");
         return;
       }
 
       submitBtn.disabled = true;
       submitBtn.classList.add("loading");
-      btnText.textContent = "审核中...";
+      btnText.textContent = "跳转中...";
 
       timer = window.setTimeout(() => {
-        window.location.href = "fail.html";
-      }, 3000);
+        window.location.href = "profile.html";
+      }, 600);
     });
 
     window.addEventListener("beforeunload", () => {
       if (timer) {
         window.clearTimeout(timer);
+      }
+      if (frontPreviewTimer) {
+        window.clearTimeout(frontPreviewTimer);
+      }
+      if (backPreviewTimer) {
+        window.clearTimeout(backPreviewTimer);
+      }
+      if (frontObjectUrl) {
+        URL.revokeObjectURL(frontObjectUrl);
+      }
+      if (backObjectUrl) {
+        URL.revokeObjectURL(backObjectUrl);
       }
     });
   </script>

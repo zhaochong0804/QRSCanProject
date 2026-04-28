@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>个人资料填写</title>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top, #eaf2ff 0%, #f5f8ff 40%, #f4f6fa 100%);
+      color: #1f2329;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 20px;
+      background: #ffffff;
+      overflow: hidden;
+      box-shadow: 0 18px 44px rgba(46, 76, 130, 0.18);
+      border: 1px solid #e5ebf7;
+    }
+
+    .top-bar {
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(135deg, #1677ff, #125ad4);
+    }
+
+    .card {
+      width: 100%;
+      padding: 20px;
+      background: #ffffff;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: 0.2px;
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      margin-bottom: 18px;
+      color: #637083;
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffb020;
+      box-shadow: 0 0 0 4px rgba(255, 176, 32, 0.16);
+    }
+
+    .form-block {
+      background: #f8faff;
+      border: 1px solid #e3e9f7;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d4d9e2;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #ffffff;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #1677ff;
+      box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+    }
+
+    .field-gap {
+      margin-top: 12px;
+    }
+
+    .face-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px dashed #c8d6f3;
+      background: #f3f7ff;
+    }
+
+    .face-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #294f9f;
+    }
+
+    .video-preview {
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+      background: #dfe7f8;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+
+    .face-actions {
+      margin-top: 10px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .face-actions button {
+      margin: 0;
+      padding: 10px 12px;
+      font-size: 14px;
+      box-shadow: none;
+    }
+
+    .face-secondary {
+      background: #ffffff;
+      color: #1677ff;
+      border: 1px solid #8cb6ff;
+    }
+
+    .face-status {
+      margin-top: 10px;
+      margin-bottom: 0;
+      font-size: 12px;
+      color: #4b5563;
+      min-height: 16px;
+    }
+
+    .review-tip {
+      margin: 10px 0 0;
+      font-size: 12px;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: #1677ff;
+      color: #ffffff;
+      padding: 12px 14px;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 18px rgba(22, 119, 255, 0.28);
+      transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.2s;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 6px 14px rgba(22, 119, 255, 0.26);
+    }
+
+    button:disabled {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    .loading .spinner {
+      display: inline-block;
+    }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 36px;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      font-size: 14px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="phone-shell" aria-label="个人资料页面">
+    <div class="top-bar">证件审核中心</div>
+    <main class="card">
+      <h1>个人资料填写</h1>
+      <p class="status-line">
+        <span class="status-dot" aria-hidden="true"></span>
+        第二步：资料填写与人脸识别
+      </p>
+      <div class="form-block">
+        <label for="educationInput">学历</label>
+        <select id="educationInput">
+          <option value="">请选择学历</option>
+          <option>高中及以下</option>
+          <option>大专</option>
+          <option>本科</option>
+          <option>硕士及以上</option>
+        </select>
+
+        <label class="field-gap" for="fundInput">公积金数</label>
+        <input
+          id="fundInput"
+          type="text"
+          inputmode="decimal"
+          placeholder="请输入公积金数，例如 3000"
+          maxlength="12"
+        />
+
+        <label class="field-gap" for="companyNameInput">单位名称</label>
+        <input
+          id="companyNameInput"
+          type="text"
+          placeholder="请输入单位名称"
+          maxlength="40"
+        />
+
+        <label class="field-gap" for="companyAddrInput">单位地址</label>
+        <input
+          id="companyAddrInput"
+          type="text"
+          placeholder="请输入单位地址"
+          maxlength="80"
+        />
+
+        <div class="face-box">
+          <p class="face-title">人脸识别（演示）</p>
+          <video id="faceVideo" class="video-preview" autoplay playsinline muted></video>
+          <canvas id="faceCanvas" width="320" height="240" hidden></canvas>
+          <div class="face-actions">
+            <button id="startFaceBtn" class="face-secondary" type="button">开启摄像头</button>
+            <button id="captureFaceBtn" type="button" disabled>拍照并识别</button>
+          </div>
+          <p class="face-status" id="faceStatus">识别状态：未开始</p>
+        </div>
+      </div>
+
+      <button id="submitBtn" type="button">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="btnText">提交审核</span>
+      </button>
+      <p id="reviewTip" class="review-tip">提交后将进入 60 秒审核流程。</p>
+    </main>
+  </section>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const educationInput = document.getElementById("educationInput");
+    const fundInput = document.getElementById("fundInput");
+    const companyNameInput = document.getElementById("companyNameInput");
+    const companyAddrInput = document.getElementById("companyAddrInput");
+    const faceVideo = document.getElementById("faceVideo");
+    const faceCanvas = document.getElementById("faceCanvas");
+    const startFaceBtn = document.getElementById("startFaceBtn");
+    const captureFaceBtn = document.getElementById("captureFaceBtn");
+    const faceStatus = document.getElementById("faceStatus");
+    const submitBtn = document.getElementById("submitBtn");
+    const btnText = document.getElementById("btnText");
+    const reviewTip = document.getElementById("reviewTip");
+    const toast = document.getElementById("toast");
+
+    let reviewTimer = null;
+    let countdownTimer = null;
+    let faceTimer = null;
+    let mediaStream = null;
+    let faceVerified = false;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1600);
+    }
+
+    function stopStream() {
+      if (!mediaStream) {
+        return;
+      }
+      mediaStream.getTracks().forEach((track) => track.stop());
+      mediaStream = null;
+      captureFaceBtn.disabled = true;
+    }
+
+    startFaceBtn.addEventListener("click", async () => {
+      if (mediaStream) {
+        faceStatus.textContent = "识别状态：摄像头已开启，请点击拍照并识别。";
+        return;
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast("当前设备不支持摄像头");
+        return;
+      }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" },
+          audio: false,
+        });
+        faceVideo.srcObject = mediaStream;
+        faceVerified = false;
+        captureFaceBtn.disabled = false;
+        faceStatus.textContent = "识别状态：摄像头已开启，请点击拍照并识别。";
+      } catch (error) {
+        showToast("无法开启摄像头，请检查权限");
+      }
+    });
+
+    captureFaceBtn.addEventListener("click", () => {
+      if (!mediaStream) {
+        showToast("请先开启摄像头");
+        return;
+      }
+
+      const context = faceCanvas.getContext("2d");
+      context.drawImage(faceVideo, 0, 0, faceCanvas.width, faceCanvas.height);
+
+      faceStatus.textContent = "识别状态：识别中...";
+      captureFaceBtn.disabled = true;
+      startFaceBtn.disabled = true;
+
+      faceTimer = window.setTimeout(() => {
+        faceVerified = Math.random() < 0.8;
+        if (faceVerified) {
+          faceStatus.textContent = "识别状态：识别通过";
+          showToast("人脸识别通过");
+        } else {
+          faceStatus.textContent = "识别状态：识别失败，请重试";
+          showToast("识别失败，请重试");
+        }
+
+        startFaceBtn.disabled = false;
+        captureFaceBtn.disabled = !mediaStream;
+      }, 2000);
+    });
+
+    submitBtn.addEventListener("click", () => {
+      if (submitBtn.disabled) {
+        return;
+      }
+
+      if (!educationInput.value) {
+        showToast("请选择学历");
+        return;
+      }
+
+      if (!fundInput.value.trim()) {
+        showToast("请输入公积金数");
+        return;
+      }
+
+      if (!/^\d+(\.\d{1,2})?$/.test(fundInput.value.trim())) {
+        showToast("公积金数格式不正确");
+        return;
+      }
+
+      if (!companyNameInput.value.trim()) {
+        showToast("请输入单位名称");
+        return;
+      }
+
+      if (!companyAddrInput.value.trim()) {
+        showToast("请输入单位地址");
+        return;
+      }
+
+      if (!faceVerified) {
+        showToast("请先完成人脸识别并通过");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add("loading");
+      btnText.textContent = "审核中（60秒）...";
+
+      let remain = 60;
+      reviewTip.textContent = `审核中，预计 ${remain} 秒后出结果...`;
+      countdownTimer = window.setInterval(() => {
+        remain -= 1;
+        reviewTip.textContent = `审核中，预计 ${remain} 秒后出结果...`;
+      }, 1000);
+
+      reviewTimer = window.setTimeout(() => {
+        window.location.href = "fail.html";
+      }, 60000);
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (reviewTimer) {
+        window.clearTimeout(reviewTimer);
+      }
+      if (countdownTimer) {
+        window.clearInterval(countdownTimer);
+      }
+      if (faceTimer) {
+        window.clearTimeout(faceTimer);
+      }
+      stopStream();
+    });
+  </script>
+</body>
+</html>
