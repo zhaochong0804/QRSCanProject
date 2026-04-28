@@ -260,8 +260,8 @@
         />
 
         <div class="face-box">
-          <p class="face-title">人脸识别（演示）</p>
-          <p class="face-desc">点击开始识别后，将进入独立识别页面完成动作校验。</p>
+          <p class="face-title">人脸识别</p>
+          <p class="face-desc">点击开始识别后，将进入人脸识别页面完成动作校验。</p>
           <button id="startFaceBtn" type="button">开始识别</button>
           <p class="face-status" id="faceStatus">识别状态：未开始</p>
         </div>
@@ -271,7 +271,7 @@
         <span class="spinner" aria-hidden="true"></span>
         <span id="btnText">提交审核</span>
       </button>
-      <p id="reviewTip" class="review-tip">提交后将进入 60 秒审核流程。</p>
+      <p id="reviewTip" class="review-tip">提交后将进入审核流程。</p>
     </main>
   </section>
 
@@ -288,6 +288,7 @@
     const btnText = document.getElementById("btnText");
     const reviewTip = document.getElementById("reviewTip");
     const toast = document.getElementById("toast");
+    const PROFILE_DRAFT_KEY = "profileDraft";
 
     let reviewTimer = null;
     let countdownTimer = null;
@@ -312,7 +313,39 @@
       }
     }
 
+    function saveDraft() {
+      const draft = {
+        education: educationInput.value,
+        fund: fundInput.value,
+        companyName: companyNameInput.value,
+        companyAddr: companyAddrInput.value,
+      };
+      sessionStorage.setItem(PROFILE_DRAFT_KEY, JSON.stringify(draft));
+    }
+
+    function restoreDraft() {
+      const raw = sessionStorage.getItem(PROFILE_DRAFT_KEY);
+      if (!raw) {
+        return;
+      }
+      try {
+        const draft = JSON.parse(raw);
+        educationInput.value = draft.education || "";
+        fundInput.value = draft.fund || "";
+        companyNameInput.value = draft.companyName || "";
+        companyAddrInput.value = draft.companyAddr || "";
+      } catch (error) {
+        sessionStorage.removeItem(PROFILE_DRAFT_KEY);
+      }
+    }
+
+    [educationInput, fundInput, companyNameInput, companyAddrInput].forEach((el) => {
+      el.addEventListener("input", saveDraft);
+      el.addEventListener("change", saveDraft);
+    });
+
     startFaceBtn.addEventListener("click", () => {
+      saveDraft();
       window.location.href = "face_verify.html";
     });
 
@@ -373,6 +406,7 @@
       showToast("人脸识别已完成");
       window.history.replaceState({}, "", "profile.html");
     }
+    restoreDraft();
     syncFaceStatus();
 
     window.addEventListener("beforeunload", () => {

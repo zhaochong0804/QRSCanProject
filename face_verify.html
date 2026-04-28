@@ -295,6 +295,8 @@
     const hintText = document.getElementById("hintText");
     const stepText = document.getElementById("stepText");
     const toast = document.getElementById("toast");
+    const ACTION_STEP_MS = 10000;
+    const CHECKING_MS = 5000;
 
     let mediaStream = null;
     let timers = [];
@@ -331,6 +333,22 @@
       return list.slice(0, 2);
     }
 
+    async function requestCameraStream() {
+      const constraintsList = [
+        { video: { facingMode: "user" }, audio: false },
+        { video: true, audio: false },
+      ];
+      for (const constraints of constraintsList) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          return stream;
+        } catch (error) {
+          // Try next constraints.
+        }
+      }
+      throw new Error("camera_unavailable");
+    }
+
     function finishAndGoBack() {
       sessionStorage.setItem("faceVerified", "true");
       sessionStorage.setItem("faceVerifiedAt", String(Date.now()));
@@ -350,10 +368,7 @@
       }
 
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" },
-          audio: false,
-        });
+        mediaStream = await requestCameraStream();
       } catch (error) {
         showToast("无法开启摄像头，请检查权限");
         startBtn.disabled = false;
@@ -361,6 +376,14 @@
       }
 
       faceVideo.srcObject = mediaStream;
+      try {
+        await faceVideo.play();
+      } catch (error) {
+        showToast("摄像头画面加载失败，请重试");
+        stopStream();
+        startBtn.disabled = false;
+        return;
+      }
       introArea.style.display = "none";
       verifyArea.style.display = "block";
 
@@ -371,18 +394,18 @@
       const stepTwoTimer = window.setTimeout(() => {
         hintText.textContent = prompts[1];
         stepText.textContent = "请按提示完成动作（2/2）";
-      }, 2600);
+      }, ACTION_STEP_MS);
       timers.push(stepTwoTimer);
 
       const checkingTimer = window.setTimeout(() => {
         hintText.textContent = "识别中...";
         stepText.textContent = "动作已完成，系统正在比对（约5秒）";
-      }, 5200);
+      }, ACTION_STEP_MS * 2);
       timers.push(checkingTimer);
 
       const successTimer = window.setTimeout(() => {
         finishAndGoBack();
-      }, 10200);
+      }, ACTION_STEP_MS * 2 + CHECKING_MS);
       timers.push(successTimer);
     }
 
