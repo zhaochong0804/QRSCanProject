@@ -234,7 +234,7 @@
     </main>
   </section>
 
-  <div id="toast" role="status" aria-live="polite">审核失败</div>
+  <div id="toast" role="status" aria-live="polite"></div>
 
   <script>
     const nameInput = document.getElementById("nameInput");
@@ -308,10 +308,7 @@
       btnText.textContent = "审核中...";
 
       timer = window.setTimeout(() => {
-        submitBtn.disabled = false;
-        submitBtn.classList.remove("loading");
-        btnText.textContent = "提交审核";
-        showToast("审核失败");
+        window.location.href = "fail.html";
       }, 3000);
     });
 
