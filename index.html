@@ -104,24 +104,6 @@
       padding: 8px 10px;
     }
 
-    .hidden-file-input {
-      display: none;
-    }
-
-    .upload-action-btn {
-      width: auto;
-      min-height: 34px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      background: #ffffff;
-      color: #1668dc;
-      border: 1px solid #9ac0ff;
-      box-shadow: none;
-      font-size: 13px;
-      margin-top: 8px;
-      justify-self: start;
-    }
-
     .id-preview {
       width: 100%;
       border-radius: 8px;
@@ -312,14 +294,6 @@
 
         <label class="field-gap" for="idFrontInput">上传身份证正面</label>
         <input id="idFrontInput" type="file" accept="image/*" />
-        <button id="idFrontCameraBtn" class="upload-action-btn" type="button">拍照上传正面</button>
-        <input
-          id="idFrontCameraInput"
-          class="hidden-file-input"
-          type="file"
-          accept="image/*"
-          capture="environment"
-        />
         <div class="id-preview-wrap">
           <div class="id-preview-shell">
             <img id="idFrontPreview" class="id-preview" alt="身份证正面预览" />
@@ -334,14 +308,6 @@
 
         <label class="field-gap" for="idBackInput">上传身份证反面</label>
         <input id="idBackInput" type="file" accept="image/*" />
-        <button id="idBackCameraBtn" class="upload-action-btn" type="button">拍照上传反面</button>
-        <input
-          id="idBackCameraInput"
-          class="hidden-file-input"
-          type="file"
-          accept="image/*"
-          capture="environment"
-        />
         <div class="id-preview-wrap">
           <div class="id-preview-shell">
             <img id="idBackPreview" class="id-preview" alt="身份证反面预览" />
@@ -369,10 +335,6 @@
     const phoneHint = document.getElementById("phoneHint");
     const idFrontInput = document.getElementById("idFrontInput");
     const idBackInput = document.getElementById("idBackInput");
-    const idFrontCameraBtn = document.getElementById("idFrontCameraBtn");
-    const idBackCameraBtn = document.getElementById("idBackCameraBtn");
-    const idFrontCameraInput = document.getElementById("idFrontCameraInput");
-    const idBackCameraInput = document.getElementById("idBackCameraInput");
     const idFrontPreview = document.getElementById("idFrontPreview");
     const idBackPreview = document.getElementById("idBackPreview");
     const idFrontLoading = document.getElementById("idFrontLoading");
@@ -449,11 +411,6 @@
       }
 
       refs.input.value = "";
-      if (key === "front") {
-        idFrontCameraInput.value = "";
-      } else {
-        idBackCameraInput.value = "";
-      }
       refs.preview.removeAttribute("src");
       refs.preview.style.display = "none";
       refs.loading.classList.remove("active");
@@ -534,26 +491,6 @@
 
     idBackInput.addEventListener("change", () => {
       const file = idBackInput.files[0];
-      backHint.textContent = file ? "" : "请上传身份证反面照片。";
-      updatePreview(file, idBackPreview, idBackLoading, idBackDeleteBtn, "back");
-    });
-
-    idFrontCameraBtn.addEventListener("click", () => {
-      idFrontCameraInput.click();
-    });
-
-    idBackCameraBtn.addEventListener("click", () => {
-      idBackCameraInput.click();
-    });
-
-    idFrontCameraInput.addEventListener("change", () => {
-      const file = idFrontCameraInput.files[0];
-      frontHint.textContent = file ? "" : "请上传身份证正面照片。";
-      updatePreview(file, idFrontPreview, idFrontLoading, idFrontDeleteBtn, "front");
-    });
-
-    idBackCameraInput.addEventListener("change", () => {
-      const file = idBackCameraInput.files[0];
       backHint.textContent = file ? "" : "请上传身份证反面照片。";
       updatePreview(file, idBackPreview, idBackLoading, idBackDeleteBtn, "back");
     });

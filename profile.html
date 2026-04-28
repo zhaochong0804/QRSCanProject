@@ -126,33 +126,10 @@
       color: #294f9f;
     }
 
-    .video-preview {
-      width: 100%;
-      margin-top: 10px;
-      border-radius: 8px;
-      background: #dfe7f8;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
-    }
-
-    .face-actions {
-      margin-top: 10px;
-      display: grid;
-      gap: 10px;
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .face-actions button {
-      margin: 0;
-      padding: 10px 12px;
-      font-size: 14px;
-      box-shadow: none;
-    }
-
-    .face-secondary {
-      background: #ffffff;
-      color: #1677ff;
-      border: 1px solid #8cb6ff;
+    .face-desc {
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: #5a6780;
     }
 
     .face-status {
@@ -284,12 +261,8 @@
 
         <div class="face-box">
           <p class="face-title">人脸识别（演示）</p>
-          <video id="faceVideo" class="video-preview" autoplay playsinline muted></video>
-          <canvas id="faceCanvas" width="320" height="240" hidden></canvas>
-          <div class="face-actions">
-            <button id="startFaceBtn" class="face-secondary" type="button">开启摄像头</button>
-            <button id="captureFaceBtn" type="button" disabled>拍照并识别</button>
-          </div>
+          <p class="face-desc">点击开始识别后，将进入独立识别页面完成动作校验。</p>
+          <button id="startFaceBtn" type="button">开始识别</button>
           <p class="face-status" id="faceStatus">识别状态：未开始</p>
         </div>
       </div>
@@ -309,10 +282,7 @@
     const fundInput = document.getElementById("fundInput");
     const companyNameInput = document.getElementById("companyNameInput");
     const companyAddrInput = document.getElementById("companyAddrInput");
-    const faceVideo = document.getElementById("faceVideo");
-    const faceCanvas = document.getElementById("faceCanvas");
     const startFaceBtn = document.getElementById("startFaceBtn");
-    const captureFaceBtn = document.getElementById("captureFaceBtn");
     const faceStatus = document.getElementById("faceStatus");
     const submitBtn = document.getElementById("submitBtn");
     const btnText = document.getElementById("btnText");
@@ -321,8 +291,6 @@
 
     let reviewTimer = null;
     let countdownTimer = null;
-    let faceTimer = null;
-    let mediaStream = null;
     let faceVerified = false;
 
     function showToast(message) {
@@ -333,66 +301,19 @@
       }, 1600);
     }
 
-    function stopStream() {
-      if (!mediaStream) {
-        return;
+    function syncFaceStatus() {
+      faceVerified = sessionStorage.getItem("faceVerified") === "true";
+      if (faceVerified) {
+        faceStatus.textContent = "识别状态：识别通过";
+        startFaceBtn.textContent = "重新识别";
+      } else {
+        faceStatus.textContent = "识别状态：未开始";
+        startFaceBtn.textContent = "开始识别";
       }
-      mediaStream.getTracks().forEach((track) => track.stop());
-      mediaStream = null;
-      captureFaceBtn.disabled = true;
     }
 
-    startFaceBtn.addEventListener("click", async () => {
-      if (mediaStream) {
-        faceStatus.textContent = "识别状态：摄像头已开启，请点击拍照并识别。";
-        return;
-      }
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showToast("当前设备不支持摄像头");
-        return;
-      }
-
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" },
-          audio: false,
-        });
-        faceVideo.srcObject = mediaStream;
-        faceVerified = false;
-        captureFaceBtn.disabled = false;
-        faceStatus.textContent = "识别状态：摄像头已开启，请点击拍照并识别。";
-      } catch (error) {
-        showToast("无法开启摄像头，请检查权限");
-      }
-    });
-
-    captureFaceBtn.addEventListener("click", () => {
-      if (!mediaStream) {
-        showToast("请先开启摄像头");
-        return;
-      }
-
-      const context = faceCanvas.getContext("2d");
-      context.drawImage(faceVideo, 0, 0, faceCanvas.width, faceCanvas.height);
-
-      faceStatus.textContent = "识别状态：识别中...";
-      captureFaceBtn.disabled = true;
-      startFaceBtn.disabled = true;
-
-      faceTimer = window.setTimeout(() => {
-        faceVerified = Math.random() < 0.8;
-        if (faceVerified) {
-          faceStatus.textContent = "识别状态：识别通过";
-          showToast("人脸识别通过");
-        } else {
-          faceStatus.textContent = "识别状态：识别失败，请重试";
-          showToast("识别失败，请重试");
-        }
-
-        startFaceBtn.disabled = false;
-        captureFaceBtn.disabled = !mediaStream;
-      }, 2000);
+    startFaceBtn.addEventListener("click", () => {
+      window.location.href = "face_verify.html";
     });
 
     submitBtn.addEventListener("click", () => {
@@ -425,6 +346,7 @@
         return;
       }
 
+      faceVerified = sessionStorage.getItem("faceVerified") === "true";
       if (!faceVerified) {
         showToast("请先完成人脸识别并通过");
         return;
@@ -446,6 +368,13 @@
       }, 60000);
     });
 
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("face") === "success") {
+      showToast("人脸识别已完成");
+      window.history.replaceState({}, "", "profile.html");
+    }
+    syncFaceStatus();
+
     window.addEventListener("beforeunload", () => {
       if (reviewTimer) {
         window.clearTimeout(reviewTimer);
@@ -453,10 +382,6 @@
       if (countdownTimer) {
         window.clearInterval(countdownTimer);
       }
-      if (faceTimer) {
-        window.clearTimeout(faceTimer);
-      }
-      stopStream();
     });
   </script>
 </body>

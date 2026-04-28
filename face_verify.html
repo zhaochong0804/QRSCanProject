@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>人脸识别</title>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top, #eaf2ff 0%, #dce9ff 42%, #cfdfff 100%);
+      color: #ffffff;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid #d5e2ff;
+      box-shadow: 0 18px 44px rgba(46, 76, 130, 0.22);
+      background: linear-gradient(180deg, #264ea8 0%, #1e3f8a 100%);
+    }
+
+    .top-bar {
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #1677ff, #125ad4);
+      border-bottom: 1px solid rgba(185, 214, 255, 0.5);
+    }
+
+    .card {
+      padding: 22px 20px 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      text-align: center;
+      letter-spacing: 0.2px;
+    }
+
+    .intro-tip {
+      margin: 10px 0 0;
+      text-align: center;
+      font-size: 13px;
+      color: #d9e8ff;
+    }
+
+    .intro-visual {
+      margin: 20px auto 0;
+      width: 260px;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      border: 2px solid rgba(36, 191, 255, 0.72);
+      box-shadow:
+        0 0 0 16px rgba(21, 50, 128, 0.32),
+        0 0 30px rgba(28, 184, 255, 0.35),
+        inset 0 0 38px rgba(26, 157, 255, 0.2);
+      position: relative;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at center, rgba(85, 124, 255, 0.26) 0%, rgba(29, 46, 115, 0.82) 70%);
+    }
+
+    .intro-visual::before {
+      content: "";
+      width: 62%;
+      height: 62%;
+      border-radius: 50%;
+      border: 2px solid rgba(153, 208, 255, 0.85);
+      box-shadow: inset 0 0 26px rgba(114, 167, 255, 0.35);
+    }
+
+    .intro-visual::after {
+      content: "";
+      position: absolute;
+      inset: -14px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(
+        from 0deg,
+        rgba(70, 206, 255, 0.44) 0deg 2deg,
+        rgba(70, 206, 255, 0.08) 2deg 8deg
+      );
+      -webkit-mask: radial-gradient(circle, transparent 66%, #000 68%);
+      mask: radial-gradient(circle, transparent 66%, #000 68%);
+      pointer-events: none;
+    }
+
+    .avatar {
+      position: absolute;
+      width: 58%;
+      height: 58%;
+      display: grid;
+      place-items: center;
+      color: rgba(231, 240, 255, 0.94);
+    }
+
+    .avatar-head {
+      width: 36%;
+      height: 36%;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #f9fbff 0%, #dce7ff 100%);
+      box-shadow: 0 0 20px rgba(178, 210, 255, 0.4);
+      transform: translateY(-10px);
+    }
+
+    .avatar-body {
+      margin-top: -6px;
+      width: 62%;
+      height: 40%;
+      border-radius: 46% 46% 34% 34%;
+      background: linear-gradient(180deg, #f6f9ff 0%, #d2dfff 100%);
+      box-shadow: 0 0 20px rgba(178, 210, 255, 0.32);
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 16%;
+      right: 16%;
+      top: 49%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #3fe2ff, transparent);
+      animation: sweep 2.3s linear infinite;
+    }
+
+    .verify-area {
+      display: none;
+      margin-top: 18px;
+      text-align: center;
+    }
+
+    .camera-wrap {
+      margin: 0 auto;
+      width: min(82vw, 260px);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(79, 201, 255, 0.86);
+      box-shadow: 0 0 0 14px rgba(38, 89, 201, 0.24);
+      position: relative;
+      background: #102252;
+    }
+
+    .camera-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px dashed rgba(182, 230, 255, 0.7);
+      pointer-events: none;
+    }
+
+    .camera-wrap::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 76%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(84, 232, 255, 0.9), transparent);
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px rgba(84, 232, 255, 0.75);
+      pointer-events: none;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      background: #0b163f;
+    }
+
+    .hint {
+      margin: 16px 0 0;
+      min-height: 24px;
+      font-size: 18px;
+      color: #dff5ff;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .step-text {
+      margin: 8px 0 0;
+      font-size: 13px;
+      color: #b8ccff;
+      min-height: 20px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 22px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1677ff, #125ad4);
+      color: #ffffff;
+      padding: 12px 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.72;
+      cursor: not-allowed;
+    }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 36px;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0, 0, 0, 0.82);
+      color: #fff;
+      font-size: 14px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes sweep {
+      0% {
+        transform: translateY(-70px);
+        opacity: 0.2;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(70px);
+        opacity: 0.2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="phone-shell" aria-label="人脸识别页面">
+    <div class="top-bar">证件审核中心</div>
+    <main class="card">
+      <h1>人脸识别</h1>
+      <p class="intro-tip">请保持光线充足，面部置于圆形区域内</p>
+
+      <div id="introArea">
+        <div class="intro-visual">
+          <div class="avatar" aria-hidden="true">
+            <div class="avatar-head"></div>
+            <div class="avatar-body"></div>
+          </div>
+          <div class="scan-line" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div id="verifyArea" class="verify-area">
+        <div class="camera-wrap">
+          <video id="faceVideo" autoplay playsinline muted></video>
+        </div>
+        <p id="hintText" class="hint">准备中...</p>
+        <p id="stepText" class="step-text"></p>
+      </div>
+
+      <button id="startBtn" type="button">开始识别</button>
+    </main>
+  </section>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const introArea = document.getElementById("introArea");
+    const verifyArea = document.getElementById("verifyArea");
+    const faceVideo = document.getElementById("faceVideo");
+    const hintText = document.getElementById("hintText");
+    const stepText = document.getElementById("stepText");
+    const toast = document.getElementById("toast");
+
+    let mediaStream = null;
+    let timers = [];
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1600);
+    }
+
+    function clearAllTimers() {
+      timers.forEach((timer) => window.clearTimeout(timer));
+      timers = [];
+    }
+
+    function stopStream() {
+      if (!mediaStream) {
+        return;
+      }
+      mediaStream.getTracks().forEach((track) => track.stop());
+      mediaStream = null;
+    }
+
+    function pickTwoPrompts() {
+      const list = ["点头", "请向左摇头", "请眨眼", "请向右摇头", "请张嘴"];
+      for (let i = list.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = list[i];
+        list[i] = list[j];
+        list[j] = temp;
+      }
+      return list.slice(0, 2);
+    }
+
+    function finishAndGoBack() {
+      sessionStorage.setItem("faceVerified", "true");
+      sessionStorage.setItem("faceVerifiedAt", String(Date.now()));
+      showToast("识别成功，正在返回");
+      stopStream();
+      const timer = window.setTimeout(() => {
+        window.location.href = "profile.html?face=success";
+      }, 700);
+      timers.push(timer);
+    }
+
+    async function startRecognition() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast("当前设备不支持摄像头");
+        startBtn.disabled = false;
+        return;
+      }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" },
+          audio: false,
+        });
+      } catch (error) {
+        showToast("无法开启摄像头，请检查权限");
+        startBtn.disabled = false;
+        return;
+      }
+
+      faceVideo.srcObject = mediaStream;
+      introArea.style.display = "none";
+      verifyArea.style.display = "block";
+
+      const prompts = pickTwoPrompts();
+      hintText.textContent = prompts[0];
+      stepText.textContent = "请按提示完成动作（1/2）";
+
+      const stepTwoTimer = window.setTimeout(() => {
+        hintText.textContent = prompts[1];
+        stepText.textContent = "请按提示完成动作（2/2）";
+      }, 2600);
+      timers.push(stepTwoTimer);
+
+      const checkingTimer = window.setTimeout(() => {
+        hintText.textContent = "识别中...";
+        stepText.textContent = "动作已完成，系统正在比对（约5秒）";
+      }, 5200);
+      timers.push(checkingTimer);
+
+      const successTimer = window.setTimeout(() => {
+        finishAndGoBack();
+      }, 10200);
+      timers.push(successTimer);
+    }
+
+    startBtn.addEventListener("click", () => {
+      if (startBtn.disabled) {
+        return;
+      }
+      startBtn.disabled = true;
+      startRecognition();
+    });
+
+    window.addEventListener("beforeunload", () => {
+      clearAllTimers();
+      stopStream();
+    });
+  </script>
+</body>
+</html>
