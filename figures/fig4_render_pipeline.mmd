@@ -1,0 +1,16 @@
+flowchart LR
+  A[情绪密度矩阵] --> B[色图映射]
+  B --> C[Alpha透明度控制]
+  C --> D[与视频画面混合]
+  D --> E[关键区域避让]
+  E --> F[终端显示/多端适配]
+  classDef data fill:#c3f5c8,stroke:#3c3c3c,stroke-width:2;
+  classDef render fill:#c8e2ff,stroke:#3c3c3c,stroke-width:2;
+  classDef control fill:#ffd6a5,stroke:#3c3c3c,stroke-width:2;
+  class A data
+  class B render
+  class C control
+  class D render
+  class E control
+  class F render
+

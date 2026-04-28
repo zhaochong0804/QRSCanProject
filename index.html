@@ -113,6 +113,16 @@
       min-height: 18px;
     }
 
+    .hint:empty {
+      display: none;
+      min-height: 0;
+      margin: 0;
+    }
+
+    .field-gap {
+      margin-top: 12px;
+    }
+
     button {
       width: 100%;
       border: none;
@@ -186,17 +196,33 @@
     <div class="top-bar">证件审核中心</div>
     <main class="card">
       <h1>身份信息审核</h1>
-      <p class="status-line">
-        <span class="status-dot" aria-hidden="true"></span>
-        当前状态：待提交
-      </p>
       <div class="form-block">
-        <label for="idInput">请输入身份证号</label>
+        <label for="nameInput">姓名</label>
+        <input
+          id="nameInput"
+          type="text"
+          autocomplete="off"
+          placeholder="请输入姓名"
+          maxlength="20"
+        />
+
+        <label class="field-gap" for="phoneInput">手机号</label>
+        <input
+          id="phoneInput"
+          type="text"
+          autocomplete="off"
+          inputmode="numeric"
+          placeholder="请输入手机号"
+          maxlength="11"
+        />
+        <p class="hint" id="phoneHint"></p>
+
+        <label class="field-gap" for="idInput">身份证号</label>
         <input
           id="idInput"
           type="text"
           autocomplete="off"
-          placeholder="仅支持数字和英文"
+          placeholder="请输入身份证号"
           maxlength="32"
         />
         <p class="hint" id="hint"></p>
@@ -208,9 +234,12 @@
     </main>
   </section>
 
-  <div id="toast" role="status" aria-live="polite">审核拒绝</div>
+  <div id="toast" role="status" aria-live="polite">审核失败</div>
 
   <script>
+    const nameInput = document.getElementById("nameInput");
+    const phoneInput = document.getElementById("phoneInput");
+    const phoneHint = document.getElementById("phoneHint");
     const idInput = document.getElementById("idInput");
     const hint = document.getElementById("hint");
     const submitBtn = document.getElementById("submitBtn");
@@ -238,8 +267,34 @@
       idInput.value = cleaned;
     });
 
+    phoneInput.addEventListener("input", () => {
+      const raw = phoneInput.value;
+      const cleaned = raw.replace(/\D/g, "").slice(0, 11);
+      if (raw !== cleaned) {
+        phoneHint.textContent = "手机号仅允许数字，已自动过滤非法字符。";
+      } else {
+        phoneHint.textContent = "";
+      }
+      phoneInput.value = cleaned;
+    });
+
     submitBtn.addEventListener("click", () => {
       if (submitBtn.disabled) {
+        return;
+      }
+
+      if (!nameInput.value.trim()) {
+        showToast("请输入姓名");
+        return;
+      }
+
+      if (!phoneInput.value.trim()) {
+        showToast("请输入手机号");
+        return;
+      }
+
+      if (!/^\d{11}$/.test(phoneInput.value)) {
+        showToast("手机号需为11位数字");
         return;
       }
 
@@ -256,7 +311,7 @@
         submitBtn.disabled = false;
         submitBtn.classList.remove("loading");
         btnText.textContent = "提交审核";
-        showToast("审核拒绝");
+        showToast("审核失败");
       }, 3000);
     });
 

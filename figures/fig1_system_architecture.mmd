@@ -1,0 +1,28 @@
+flowchart LR
+  A[客户端/终端] --> B[边缘网关]
+  B --> C[聚合服务]
+  B --> D[渲染服务]
+  C --> E[消息中间件/CDN]
+  D --> E
+  E --> F[存储/分析]
+  E --> C
+  E --> D
+  subgraph 服务端
+    C
+    D
+    E
+    F
+  end
+  classDef client fill:#c8e2ff,stroke:#3c3c3c,stroke-width:2;
+  classDef gateway fill:#ffd6a5,stroke:#3c3c3c,stroke-width:2;
+  classDef service fill:#ddc9ff,stroke:#3c3c3c,stroke-width:2;
+  classDef render fill:#c3f5c8,stroke:#3c3c3c,stroke-width:2;
+  classDef bus fill:#b4f0f0,stroke:#3c3c3c,stroke-width:2;
+  classDef storage fill:#d2d2d2,stroke:#3c3c3c,stroke-width:2;
+  class A client
+  class B gateway
+  class C service
+  class D render
+  class E bus
+  class F storage
+

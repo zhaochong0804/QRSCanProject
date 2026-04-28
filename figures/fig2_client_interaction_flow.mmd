@@ -1,0 +1,12 @@
+flowchart LR
+  A[用户触发投票] --> B[位置与情绪选择]
+  B --> C[本地节流/速率限制]
+  C --> D[事件队列]
+  D --> E[WebSocket/QUIC推送]
+  E --> F[服务端聚合入口]
+  classDef step fill:#c8e2ff,stroke:#3c3c3c,stroke-width:2;
+  classDef io fill:#b4f0f0,stroke:#3c3c3c,stroke-width:2;
+  class A,B,C,D step
+  class E io
+  class F step
+

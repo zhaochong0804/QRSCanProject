@@ -1,0 +1,26 @@
+flowchart TB
+  subgraph 检测策略
+    R[速率限制]
+    S[信誉评分]
+    A[异常检测]
+    M[多账号关联]
+  end
+  subgraph 处置策略
+    DW[降权处理]
+    IS[隔离审查]
+    BL[黑名单/封禁]
+    AU[审计与回溯]
+  end
+  R --> DW
+  S --> DW
+  A --> IS
+  A --> BL
+  M --> BL
+  M --> IS
+  S --> AU
+  A --> AU
+  classDef detect fill:#ffd6a5,stroke:#3c3c3c,stroke-width:2;
+  classDef act fill:#ddc9ff,stroke:#3c3c3c,stroke-width:2;
+  class R,S,A,M detect
+  class DW,IS,BL,AU act
+

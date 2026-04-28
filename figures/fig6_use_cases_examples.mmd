@@ -1,0 +1,22 @@
+flowchart LR
+  S1[体育赛事] --> V[观众投票]
+  S2[演唱会] --> V
+  S3[新闻直播] --> V
+  V --> G[热力层生成]
+  G --> O[叠加显示]
+  O --> A[分析与回放]
+  subgraph legend[图例]
+    L1[正向情绪-暖色]
+    L2[负向情绪-冷色]
+    L3[惊喜/高潮-橙色]
+    L4[赞同/支持-绿色]
+    L5[其他-粉色]
+  end
+  classDef scene fill:#eaeaea,stroke:#3c3c3c,stroke-width:2;
+  classDef process fill:#c3f5c8,stroke:#3c3c3c,stroke-width:2;
+  classDef display fill:#c8e2ff,stroke:#3c3c3c,stroke-width:2;
+  classDef legendclass fill:#ffffff,stroke:#3c3c3c,stroke-width:1;
+  class S1,S2,S3 scene
+  class V,G process
+  class O,A display
+  class L1,L2,L3,L4,L5 legendclass

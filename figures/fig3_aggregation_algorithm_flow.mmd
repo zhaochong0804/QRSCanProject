@@ -1,0 +1,11 @@
+flowchart LR
+  A[滑动时间窗] --> B[空间网格化]
+  B --> C[核密度估计/扩散]
+  C --> D[信誉权重与去噪]
+  D --> E[归一化与阈值裁剪]
+  E --> F[输出情绪密度矩阵]
+  classDef algo fill:#ddc9ff,stroke:#3c3c3c,stroke-width:2;
+  classDef result fill:#c3f5c8,stroke:#3c3c3c,stroke-width:2;
+  class A,B,C,D,E algo
+  class F result
+
