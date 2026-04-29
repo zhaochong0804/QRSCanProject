@@ -300,6 +300,7 @@
 
     let mediaStream = null;
     let timers = [];
+    let checkingDotsTimer = null;
 
     function showToast(message) {
       toast.textContent = message;
@@ -312,6 +313,26 @@
     function clearAllTimers() {
       timers.forEach((timer) => window.clearTimeout(timer));
       timers = [];
+    }
+
+    function startCheckingDotsAnimation() {
+      if (checkingDotsTimer) {
+        window.clearInterval(checkingDotsTimer);
+      }
+      let dots = 0;
+      hintText.textContent = "识别中";
+      checkingDotsTimer = window.setInterval(() => {
+        dots = (dots + 1) % 4;
+        hintText.textContent = `识别中${".".repeat(dots)}`;
+      }, 450);
+    }
+
+    function stopCheckingDotsAnimation() {
+      if (!checkingDotsTimer) {
+        return;
+      }
+      window.clearInterval(checkingDotsTimer);
+      checkingDotsTimer = null;
     }
 
     function stopStream() {
@@ -350,6 +371,7 @@
     }
 
     function finishAndGoBack() {
+      stopCheckingDotsAnimation();
       sessionStorage.setItem("faceVerified", "true");
       sessionStorage.setItem("faceVerifiedAt", String(Date.now()));
       showToast("识别成功，正在返回");
@@ -398,7 +420,7 @@
       timers.push(stepTwoTimer);
 
       const checkingTimer = window.setTimeout(() => {
-        hintText.textContent = "识别中...";
+        startCheckingDotsAnimation();
         stepText.textContent = "动作已完成，系统正在比对（约5秒）";
       }, ACTION_STEP_MS * 2);
       timers.push(checkingTimer);
@@ -419,6 +441,7 @@
 
     window.addEventListener("beforeunload", () => {
       clearAllTimers();
+      stopCheckingDotsAnimation();
       stopStream();
     });
   </script>

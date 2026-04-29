@@ -307,6 +307,7 @@
     let reviewTimer = null;
     let countdownTimer = null;
     let faceVerified = false;
+    let reviewLocking = false;
 
     function showToast(message) {
       toast.textContent = message;
@@ -314,6 +315,14 @@
       window.setTimeout(() => {
         toast.classList.remove("show");
       }, 1600);
+    }
+
+    function setPageLocked(locked) {
+      reviewLocking = locked;
+      [educationInput, fundInput, companyNameInput, companyAddrInput, startFaceBtn].forEach((el) => {
+        el.disabled = locked;
+      });
+      submitBtn.disabled = locked;
     }
 
     function syncFaceStatus() {
@@ -366,6 +375,9 @@
     });
 
     startFaceBtn.addEventListener("click", () => {
+      if (reviewLocking) {
+        return;
+      }
       saveDraft();
       window.location.href = "face_verify.html";
     });
@@ -406,7 +418,7 @@
         return;
       }
 
-      submitBtn.disabled = true;
+      setPageLocked(true);
       submitBtn.classList.add("loading");
       btnText.textContent = "审核中...";
 
