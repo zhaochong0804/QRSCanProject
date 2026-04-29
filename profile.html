@@ -362,6 +362,15 @@
       }
     }
 
+    function clearDraftAndForm() {
+      sessionStorage.removeItem(PROFILE_DRAFT_KEY);
+      educationInput.value = "";
+      fundInput.value = "";
+      companyNameInput.value = "";
+      companyAddrInput.value = "";
+      fundHint.textContent = "";
+    }
+
     [educationInput, fundInput, companyNameInput, companyAddrInput].forEach((el) => {
       el.addEventListener("input", saveDraft);
       el.addEventListener("change", saveDraft);
@@ -440,7 +449,7 @@
 
     if (fromIndex) {
       // 从首页新进入时，清空上次个人资料草稿与识别状态
-      sessionStorage.removeItem(PROFILE_DRAFT_KEY);
+      clearDraftAndForm();
       sessionStorage.removeItem("faceVerified");
       sessionStorage.removeItem("faceVerifiedAt");
       window.history.replaceState({}, "", "profile.html");

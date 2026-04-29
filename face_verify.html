@@ -440,13 +440,12 @@
       }
       const start = Date.now();
       progressBar.style.width = "0%";
-      stepText.textContent = `${textPrefix}（剩余 ${Math.ceil(durationMs / 1000)} 秒）`;
+      stepText.textContent = textPrefix;
       progressTimer = window.setInterval(() => {
         const elapsed = Date.now() - start;
         const ratio = Math.min(elapsed / durationMs, 1);
-        const left = Math.max(Math.ceil((durationMs - elapsed) / 1000), 0);
         progressBar.style.width = `${Math.floor(ratio * 100)}%`;
-        stepText.textContent = `${textPrefix}（剩余 ${left} 秒）`;
+        stepText.textContent = textPrefix;
         if (ratio >= 1) {
           window.clearInterval(progressTimer);
           progressTimer = null;

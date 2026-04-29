@@ -346,6 +346,7 @@
     const submitBtn = document.getElementById("submitBtn");
     const btnText = document.getElementById("btnText");
     const toast = document.getElementById("toast");
+    const INDEX_RESET_PARAM = "resetProfile";
 
     let timer = null;
     let frontPreviewTimer = null;
@@ -363,6 +364,15 @@
       window.setTimeout(() => {
         toast.classList.remove("show");
       }, 1600);
+    }
+
+    const indexParams = new URLSearchParams(window.location.search);
+    if (indexParams.get(INDEX_RESET_PARAM) === "1") {
+      // 失败页返回首页后，先清空第二页草稿状态，避免下次进入残留
+      sessionStorage.removeItem("profileDraft");
+      sessionStorage.removeItem("faceVerified");
+      sessionStorage.removeItem("faceVerifiedAt");
+      window.history.replaceState({}, "", "index.html");
     }
 
     phoneInput.addEventListener("input", () => {
