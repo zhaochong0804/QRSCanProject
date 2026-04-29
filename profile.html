@@ -435,10 +435,20 @@
     });
 
     const params = new URLSearchParams(window.location.search);
-    if (params.get("face") === "success") {
+    const fromIndex = params.get("from") === "index";
+    const fromFaceSuccess = params.get("face") === "success";
+
+    if (fromIndex) {
+      // 从首页新进入时，清空上次个人资料草稿与识别状态
+      sessionStorage.removeItem(PROFILE_DRAFT_KEY);
+      sessionStorage.removeItem("faceVerified");
+      sessionStorage.removeItem("faceVerifiedAt");
+      window.history.replaceState({}, "", "profile.html");
+    } else if (fromFaceSuccess) {
       showToast("人脸识别已完成");
       window.history.replaceState({}, "", "profile.html");
     }
+
     restoreDraft();
     syncFaceStatus();
 
