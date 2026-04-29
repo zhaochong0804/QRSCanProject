@@ -155,6 +155,7 @@
       box-shadow: 0 0 0 14px rgba(38, 89, 201, 0.24);
       position: relative;
       background: #102252;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
     }
 
     .camera-wrap::before {
@@ -177,6 +178,14 @@
       transform: translate(-50%, -50%);
       box-shadow: 0 0 10px rgba(84, 232, 255, 0.75);
       pointer-events: none;
+      animation: linePulse 1.8s ease-in-out infinite;
+    }
+
+    .camera-wrap.active {
+      box-shadow:
+        0 0 0 14px rgba(38, 89, 201, 0.24),
+        0 0 26px rgba(84, 232, 255, 0.35);
+      animation: ringBreath 2s ease-in-out infinite;
     }
 
     video {
@@ -201,6 +210,32 @@
       font-size: 13px;
       color: #b8ccff;
       min-height: 20px;
+    }
+
+    .dot-typing::after {
+      content: "";
+      display: inline-block;
+      width: 1.4em;
+      text-align: left;
+      animation: dots 1.2s steps(4, end) infinite;
+    }
+
+    .progress-wrap {
+      margin-top: 12px;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(179, 214, 255, 0.26);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #52d6ff, #95a8ff);
+      box-shadow: 0 0 10px rgba(124, 220, 255, 0.58);
+      transition: width 0.2s linear;
     }
 
     button {
@@ -254,6 +289,44 @@
         opacity: 0.2;
       }
     }
+
+    @keyframes dots {
+      0% {
+        content: "";
+      }
+      25% {
+        content: ".";
+      }
+      50% {
+        content: "..";
+      }
+      75% {
+        content: "...";
+      }
+      100% {
+        content: "";
+      }
+    }
+
+    @keyframes ringBreath {
+      0%,
+      100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.012);
+      }
+    }
+
+    @keyframes linePulse {
+      0%,
+      100% {
+        opacity: 0.45;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 <body>
@@ -274,11 +347,14 @@
       </div>
 
       <div id="verifyArea" class="verify-area">
-        <div class="camera-wrap">
+        <div id="cameraWrap" class="camera-wrap">
           <video id="faceVideo" autoplay playsinline muted></video>
         </div>
         <p id="hintText" class="hint">准备中...</p>
         <p id="stepText" class="step-text"></p>
+        <div class="progress-wrap">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
       </div>
 
       <button id="startBtn" type="button">开始识别</button>
@@ -291,15 +367,18 @@
     const startBtn = document.getElementById("startBtn");
     const introArea = document.getElementById("introArea");
     const verifyArea = document.getElementById("verifyArea");
+    const cameraWrap = document.getElementById("cameraWrap");
     const faceVideo = document.getElementById("faceVideo");
     const hintText = document.getElementById("hintText");
     const stepText = document.getElementById("stepText");
+    const progressBar = document.getElementById("progressBar");
     const toast = document.getElementById("toast");
     const ACTION_STEP_MS = 5000;
     const CHECKING_MS = 5000;
 
     let mediaStream = null;
     let timers = [];
+    let progressTimer = null;
     let checkingDotsTimer = null;
 
     function showToast(message) {
@@ -310,9 +389,20 @@
       }, 1600);
     }
 
+    function vibrate(pattern) {
+      if (!("vibrate" in navigator)) {
+        return;
+      }
+      navigator.vibrate(pattern);
+    }
+
     function clearAllTimers() {
       timers.forEach((timer) => window.clearTimeout(timer));
       timers = [];
+      if (progressTimer) {
+        window.clearInterval(progressTimer);
+        progressTimer = null;
+      }
     }
 
     function startCheckingDotsAnimation() {
@@ -341,6 +431,27 @@
       }
       mediaStream.getTracks().forEach((track) => track.stop());
       mediaStream = null;
+      cameraWrap.classList.remove("active");
+    }
+
+    function runProgress(durationMs, textPrefix) {
+      if (progressTimer) {
+        window.clearInterval(progressTimer);
+      }
+      const start = Date.now();
+      progressBar.style.width = "0%";
+      stepText.textContent = `${textPrefix}（剩余 ${Math.ceil(durationMs / 1000)} 秒）`;
+      progressTimer = window.setInterval(() => {
+        const elapsed = Date.now() - start;
+        const ratio = Math.min(elapsed / durationMs, 1);
+        const left = Math.max(Math.ceil((durationMs - elapsed) / 1000), 0);
+        progressBar.style.width = `${Math.floor(ratio * 100)}%`;
+        stepText.textContent = `${textPrefix}（剩余 ${left} 秒）`;
+        if (ratio >= 1) {
+          window.clearInterval(progressTimer);
+          progressTimer = null;
+        }
+      }, 200);
     }
 
     function pickTwoPrompts() {
@@ -374,6 +485,7 @@
       stopCheckingDotsAnimation();
       sessionStorage.setItem("faceVerified", "true");
       sessionStorage.setItem("faceVerifiedAt", String(Date.now()));
+      vibrate([120, 60, 120]);
       showToast("识别成功，正在返回");
       stopStream();
       const timer = window.setTimeout(() => {
@@ -408,20 +520,27 @@
       }
       introArea.style.display = "none";
       verifyArea.style.display = "block";
+      cameraWrap.classList.add("active");
 
       const prompts = pickTwoPrompts();
       hintText.textContent = prompts[0];
-      stepText.textContent = "请按提示完成动作（1/2）";
+      hintText.classList.remove("dot-typing");
+      vibrate(80);
+      runProgress(ACTION_STEP_MS, "请按提示完成动作（1/2）");
 
       const stepTwoTimer = window.setTimeout(() => {
         hintText.textContent = prompts[1];
-        stepText.textContent = "请按提示完成动作（2/2）";
+        hintText.classList.remove("dot-typing");
+        vibrate(80);
+        runProgress(ACTION_STEP_MS, "请按提示完成动作（2/2）");
       }, ACTION_STEP_MS);
       timers.push(stepTwoTimer);
 
       const checkingTimer = window.setTimeout(() => {
-        startCheckingDotsAnimation();
-        stepText.textContent = "动作已完成，系统正在比对（约5秒）";
+        hintText.textContent = "识别中";
+        hintText.classList.add("dot-typing");
+        vibrate([60, 50, 60]);
+        runProgress(CHECKING_MS, "动作已完成，系统正在比对");
       }, ACTION_STEP_MS * 2);
       timers.push(checkingTimer);
 
