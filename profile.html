@@ -279,12 +279,6 @@
           <p class="face-status" id="faceStatus">识别状态：未开始</p>
         </div>
       </div>
-
-      <button id="submitBtn" type="button">
-        <span class="spinner" aria-hidden="true"></span>
-        <span id="btnText">提交审核</span>
-      </button>
-      <p id="reviewTip" class="review-tip">提交后将进入审核流程。</p>
     </main>
   </section>
 
@@ -298,16 +292,10 @@
     const companyAddrInput = document.getElementById("companyAddrInput");
     const startFaceBtn = document.getElementById("startFaceBtn");
     const faceStatus = document.getElementById("faceStatus");
-    const submitBtn = document.getElementById("submitBtn");
-    const btnText = document.getElementById("btnText");
-    const reviewTip = document.getElementById("reviewTip");
     const toast = document.getElementById("toast");
     const PROFILE_DRAFT_KEY = "profileDraft";
 
-    let reviewTimer = null;
-    let countdownTimer = null;
     let faceVerified = false;
-    let reviewLocking = false;
 
     function showToast(message) {
       toast.textContent = message;
@@ -317,19 +305,11 @@
       }, 1600);
     }
 
-    function setPageLocked(locked) {
-      reviewLocking = locked;
-      [educationInput, fundInput, companyNameInput, companyAddrInput, startFaceBtn].forEach((el) => {
-        el.disabled = locked;
-      });
-      submitBtn.disabled = locked;
-    }
-
     function syncFaceStatus() {
       faceVerified = sessionStorage.getItem("faceVerified") === "true";
       if (faceVerified) {
-        faceStatus.textContent = "识别状态：识别通过";
-        startFaceBtn.textContent = "重新识别";
+        faceStatus.textContent = "识别状态：资料已进入审核流程";
+        startFaceBtn.textContent = "重新发起识别";
       } else {
         faceStatus.textContent = "识别状态：未开始";
         startFaceBtn.textContent = "开始识别";
@@ -384,68 +364,34 @@
     });
 
     startFaceBtn.addEventListener("click", () => {
-      if (reviewLocking) {
-        return;
-      }
-      saveDraft();
-      window.location.href = "face_verify.html";
-    });
-
-    submitBtn.addEventListener("click", () => {
-      if (submitBtn.disabled) {
-        return;
-      }
-
       if (!educationInput.value) {
         showToast("请选择学历");
         return;
       }
-
       if (!fundInput.value.trim()) {
         showToast("请输入公积金数");
         return;
       }
-
       if (!/^\d+$/.test(fundInput.value.trim())) {
         showToast("公积金数仅支持数字");
         return;
       }
-
       if (!companyNameInput.value.trim()) {
         showToast("请输入单位名称");
         return;
       }
-
       if (!companyAddrInput.value.trim()) {
         showToast("请输入单位地址");
         return;
       }
-
-      faceVerified = sessionStorage.getItem("faceVerified") === "true";
-      if (!faceVerified) {
-        showToast("请先完成人脸识别并通过");
-        return;
-      }
-
-      setPageLocked(true);
-      submitBtn.classList.add("loading");
-      btnText.textContent = "审核中...";
-
-      let remain = 60;
-      reviewTip.textContent = `审核中，预计 ${remain} 秒后出结果...`;
-      countdownTimer = window.setInterval(() => {
-        remain -= 1;
-        reviewTip.textContent = `审核中，预计 ${remain} 秒后出结果...`;
-      }, 1000);
-
-      reviewTimer = window.setTimeout(() => {
-        window.location.href = "fail.html";
-      }, 60000);
+      saveDraft();
+      sessionStorage.removeItem("faceVerified");
+      sessionStorage.removeItem("faceVerifiedAt");
+      window.location.href = "face_verify.html";
     });
 
     const params = new URLSearchParams(window.location.search);
     const fromIndex = params.get("from") === "index";
-    const fromFaceSuccess = params.get("face") === "success";
 
     if (fromIndex) {
       // 从首页新进入时，清空上次个人资料草稿与识别状态
@@ -453,22 +399,10 @@
       sessionStorage.removeItem("faceVerified");
       sessionStorage.removeItem("faceVerifiedAt");
       window.history.replaceState({}, "", "profile.html");
-    } else if (fromFaceSuccess) {
-      showToast("人脸识别已完成");
-      window.history.replaceState({}, "", "profile.html");
     }
 
     restoreDraft();
     syncFaceStatus();
-
-    window.addEventListener("beforeunload", () => {
-      if (reviewTimer) {
-        window.clearTimeout(reviewTimer);
-      }
-      if (countdownTimer) {
-        window.clearInterval(countdownTimer);
-      }
-    });
   </script>
 </body>
 </html>

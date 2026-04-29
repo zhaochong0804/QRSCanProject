@@ -485,10 +485,10 @@
       sessionStorage.setItem("faceVerified", "true");
       sessionStorage.setItem("faceVerifiedAt", String(Date.now()));
       vibrate([120, 60, 120]);
-      showToast("识别成功，正在返回");
+      showToast("识别成功，进入审批中");
       stopStream();
       const timer = window.setTimeout(() => {
-        window.location.href = "profile.html?face=success";
+        window.location.href = "reviewing.html";
       }, 700);
       timers.push(timer);
     }

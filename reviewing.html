@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>审批中</title>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top, #fff2f5 0%, #ffe9ef 40%, #f7f8fc 100%);
+      color: #1f2329;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 20px;
+      background: #ffffff;
+      overflow: hidden;
+      border: 1px solid #f2d9df;
+      box-shadow: 0 18px 44px rgba(124, 73, 82, 0.15);
+    }
+
+    .top-bar {
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(135deg, #f3889d, #e9758d);
+    }
+
+    .card {
+      padding: 26px 20px 24px;
+      text-align: center;
+    }
+
+    .icon-wrap {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #e96f87;
+      font-size: 30px;
+      background: #fff1f4;
+      border: 2px solid #ffd3dc;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 38px;
+      color: #2e3142;
+      letter-spacing: 0.4px;
+      line-height: 1.25;
+    }
+
+    .sub {
+      margin: 10px 0 0;
+      color: #8a8fa3;
+      font-size: 14px;
+    }
+
+    .status-btn {
+      margin-top: 26px;
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      height: 54px;
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #f6a2b2 0%, #f08ca0 40%, #f6a2b2 80%);
+      background-size: 200% 100%;
+      animation: sweep 1.6s linear infinite;
+    }
+
+    .progress-track {
+      margin-top: 16px;
+      height: 6px;
+      border-radius: 999px;
+      background: #f7d4dc;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      width: 30%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f48ba0, #f6b0bd);
+      animation: loading 1.3s ease-in-out infinite;
+    }
+
+    .dot-text {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #8f8290;
+      min-height: 20px;
+    }
+
+    @keyframes pulse {
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(236, 125, 145, 0.28);
+      }
+      50% {
+        transform: scale(1.06);
+        box-shadow: 0 0 0 10px rgba(236, 125, 145, 0);
+      }
+    }
+
+    @keyframes sweep {
+      from {
+        background-position: 0% 50%;
+      }
+      to {
+        background-position: 120% 50%;
+      }
+    }
+
+    @keyframes loading {
+      0% {
+        transform: translateX(-90%);
+      }
+      50% {
+        transform: translateX(90%);
+      }
+      100% {
+        transform: translateX(260%);
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="phone-shell" aria-label="审批中页面">
+    <div class="top-bar">审核中心</div>
+    <main class="card">
+      <div class="icon-wrap" aria-hidden="true">⌛</div>
+      <h1>额度正在审批中...</h1>
+      <p class="sub">预计 2-3 分钟完成审批</p>
+      <button class="status-btn" type="button" disabled>审批中</button>
+      <div class="progress-track">
+        <div class="progress-bar"></div>
+      </div>
+      <p class="dot-text" id="dotText">系统正在处理</p>
+    </main>
+  </section>
+
+  <script>
+    const dotText = document.getElementById("dotText");
+    let dotTimer = null;
+    let jumpTimer = null;
+
+    function startDotAnimation() {
+      let dots = 0;
+      dotTimer = window.setInterval(() => {
+        dots = (dots + 1) % 4;
+        dotText.textContent = `系统正在处理${".".repeat(dots)}`;
+      }, 450);
+    }
+
+    startDotAnimation();
+    jumpTimer = window.setTimeout(() => {
+      window.location.href = "fail.html";
+    }, 60000);
+
+    window.addEventListener("beforeunload", () => {
+      if (dotTimer) {
+        window.clearInterval(dotTimer);
+      }
+      if (jumpTimer) {
+        window.clearTimeout(jumpTimer);
+      }
+    });
+  </script>
+</body>
+</html>

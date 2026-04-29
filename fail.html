@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>审核失败</title>
+  <title>测算结果</title>
   <style>
     :root {
       color-scheme: light;
@@ -22,69 +22,54 @@
       padding: 20px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
         "Microsoft YaHei", sans-serif;
-      background: radial-gradient(circle at top, #ffeef0 0%, #fff5f6 45%, #f8f9fb 100%);
+      background: radial-gradient(circle at top, #fff4e7 0%, #ffedd6 42%, #fff8f0 100%);
       color: #1f2329;
     }
 
-    .phone-shell {
+    .card {
       width: 100%;
       max-width: 420px;
-      border-radius: 20px;
-      background: #ffffff;
-      overflow: hidden;
-      border: 1px solid #f1d9dd;
-      box-shadow: 0 18px 44px rgba(118, 49, 62, 0.14);
-    }
-
-    .top-bar {
-      padding: 14px 16px;
-      font-size: 15px;
-      font-weight: 600;
-      color: #ffffff;
-      background: linear-gradient(135deg, #f05a72, #e0455f);
-    }
-
-    .card {
-      padding: 26px 20px 20px;
+      padding: 18px 12px 16px;
       text-align: center;
     }
 
     .icon-wrap {
-      width: 72px;
-      height: 72px;
+      width: 84px;
+      height: 84px;
       border-radius: 50%;
-      margin: 0 auto 16px;
+      margin: 0 auto 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #fff2f4;
-      border: 2px solid #ffc7d1;
+      background: #fff4e5;
+      border: 2px solid #ffd7a1;
+      box-shadow: 0 10px 26px rgba(239, 150, 26, 0.16);
     }
 
     .icon-wrap::before {
-      content: "!";
-      width: 42px;
-      height: 42px;
+      content: "⚠";
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 30px;
       font-weight: 700;
       color: #ffffff;
-      background: linear-gradient(135deg, #f05a72, #e0455f);
+      background: linear-gradient(135deg, #f7a32d, #ef8f12);
     }
 
     h1 {
       margin: 0;
       font-size: 24px;
-      color: #d93656;
+      color: #d17a0d;
       letter-spacing: 0.4px;
     }
 
     .desc {
       margin: 12px 0 0;
-      color: #6b7280;
+      color: #7b6a53;
       font-size: 14px;
       line-height: 1.7;
     }
@@ -107,30 +92,20 @@
     }
 
     .btn-primary {
-      background: #d93656;
+      background: linear-gradient(135deg, #f7a32d, #ef8f12);
       color: #ffffff;
-      box-shadow: 0 8px 18px rgba(217, 54, 86, 0.22);
-    }
-
-    .btn-secondary {
-      background: #ffffff;
-      color: #d93656;
-      border: 1px solid #f3a7b5;
+      box-shadow: 0 8px 18px rgba(239, 143, 18, 0.22);
     }
   </style>
 </head>
 <body>
-  <section class="phone-shell" aria-label="审核失败页面">
-    <div class="top-bar">证件审核中心</div>
-    <main class="card">
-      <div class="icon-wrap" aria-hidden="true"></div>
-      <h1>审核失败</h1>
-      <p class="desc">很抱歉，你提交的信息暂未通过审核。</p>
-
-      <div class="actions">
-        <a class="btn btn-primary" href="./index.html?resetProfile=1">返回修改信息</a>
-      </div>
-    </main>
-  </section>
+  <main class="card" aria-label="审核失败页面">
+    <div class="icon-wrap" aria-hidden="true"></div>
+    <h1>失败</h1>
+    <p class="desc">抱歉，您暂未获得个人信用贷款额度。</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="./index.html?resetProfile=1">返回</a>
+    </div>
+  </main>
 </body>
 </html>
